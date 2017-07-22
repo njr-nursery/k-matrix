@@ -2,4 +2,10 @@
 
 base="$(cd "$(dirname "$0")" && pwd -P)"
 
-echo $base
+die() { echo >&2 FATAL: $@; exit 1; }
+
+# TODO: We need to build the version of K we're testing against, so
+# that we know that they were build cleanly from a particular SHA.
+have_k() { type kompile >/dev/null || die "kompile unavailable."; }
+
+have_k
