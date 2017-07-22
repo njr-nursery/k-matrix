@@ -8,4 +8,19 @@ die() { echo >&2 FATAL: $@; exit 1; }
 # that we know that they were build cleanly from a particular SHA.
 have_k() { type kompile >/dev/null || die "kompile unavailable."; }
 
+do_kompile() {
+    local lang_file="$1"; shift         # Absolute path to a '.k' file
+    local relative=${lang_file##$base/tests/}
+    local rel_dirname=${relative%%.k}
+
+    local target_dir=".build/$rel_dirname"
+    mkdir -p "$target_dir"
+    kompile -d "$target_dir" "$lang_file"
+    echo "$target_dir"
+}
+
+cd "$base"
 have_k
+
+lang="$(do_kompile tests/basic/lang.k)"
+krun -d "$lang" ./tests/basic/foo.lang
