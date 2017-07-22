@@ -2,6 +2,7 @@
 
 base="$(cd "$(dirname "$0")" && pwd -P)"
 
+progress() { echo >&2 == "$@"; }
 die() { echo >&2 FATAL: $@; exit 1; }
 
 # TODO: We need to build the version of K we're testing against, so
@@ -19,8 +20,23 @@ do_kompile() {
     echo "$target_dir"
 }
 
+do_run() {
+    local out_file="$1"
+    local program="${out_file%.out}"
+    local lang="${program##*.}"    # Extract lang from extension
+    local k_def="$(dirname "$out_file")/$lang.k"
+    [[ -e "$k_def"   ]] || die "K definition '$k_def' doesn't exist"
+    [[ -e "$program" ]] || die "Program '$program' doesn't exist"
+
+    progress "Kompiling $k_def"
+    lang_kompiled="$(do_kompile "$k_def")"
+    progress "Running $program"
+    krun -d "$lang_kompiled" "$program"
+}
+
 cd "$base"
 have_k
 
-lang="$(do_kompile tests/basic/lang.k)"
-krun -d "$lang" ./tests/basic/foo.lang
+while read out_file; do
+    do_run "$out_file"
+done < <(find tests/ -name '*.out')
