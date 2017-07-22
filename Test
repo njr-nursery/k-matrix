@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 base="$(cd "$(dirname "$0")" && pwd -P)"
+test_base="$base/tests/"
 
 progress() { echo >&2 == "$@"; }
 die() { echo >&2 FATAL: $@; exit 1; }
@@ -11,7 +12,7 @@ have_k() { type kompile >/dev/null || die "kompile unavailable."; }
 
 do_kompile() {
     local lang_file="$1"; shift         # Absolute path to a '.k' file
-    local relative=${lang_file##$base/tests/}
+    local relative="${lang_file##$test_base}"
     local rel_dirname=${relative%%.k}
 
     local target_dir=".build/$rel_dirname"
@@ -47,4 +48,4 @@ have_k
 
 while read out_file; do
     do_run "$out_file"
-done < <(find tests/ -name '*.out')
+done < <(find "$test_base" -name '*.out')
