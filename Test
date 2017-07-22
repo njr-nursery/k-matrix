@@ -31,7 +31,15 @@ do_run() {
     progress "Kompiling $k_def"
     lang_kompiled="$(do_kompile "$k_def")"
     progress "Running $program"
-    krun -d "$lang_kompiled" "$program"
+    do_diff <(krun -d "$lang_kompiled" "$program") "$out_file"
+}
+
+my_diff=colordiff
+type colordiff >/dev/null 2>/dev/null || my_diff=diff
+do_diff() {
+    local actual="$1"; shift
+    local expected="$1"; shift
+    "$my_diff" -u --label Actual "$actual" --label Expected "$expected"
 }
 
 cd "$base"
