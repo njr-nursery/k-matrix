@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 
 base="$(cd "$(dirname "$0")" && pwd -P)"
-test_base="$base/tests/"
+test_base="$base/.build/tests/"
 
 progress() { echo >&2 == "$@"; }
 die() { echo >&2 FATAL: $@; exit 1; }
 
-# TODO: We need to build the version of K we're testing against, so
-# that we know that they were build cleanly from a particular SHA.
-have_k() { type kompile >/dev/null || die "kompile unavailable."; }
+need_in_path() { type "$1" >/dev/null || die "$1 unavailable."; }
 
 do_kompile() {
     local lang_file="$1"; shift         # Absolute path to a '.k' file
     local relative="${lang_file##$test_base}"
     local rel_dirname=${relative%%.k}
 
-    local target_dir=".build/$rel_dirname"
+    local target_dir="$rel_dirname"
     mkdir -p "$target_dir"
     kompile -d "$target_dir" "$lang_file"
     echo "$target_dir"
@@ -43,8 +41,27 @@ do_diff() {
     "$my_diff" -u --label Actual "$actual" --label Expected "$expected"
 }
 
+# TODO: This is not going to work. We need tangle to automatically figure out
+# what files are in the markdown, and write them all to disk.
+do_tangle() {
+    local md="$1"
+    local out_dir=".build/tests/$(basename "$md" .md)"
+    local tangle_args=(--strip-text --from markdown --to code-k --code)
+    mkdir -p "$out_dir"
+    pandoc-tangle "${tangle_args[@]}" lang-k       "$md" > "$out_dir/lang.k"
+    pandoc-tangle "${tangle_args[@]}" foo.lang     "$md" > "$out_dir/foo.lang"
+    pandoc-tangle "${tangle_args[@]}" foo.lang.out "$md" > "$out_dir/foo.lang.out"
+}
+
 cd "$base"
-have_k
+
+# TODO: We need to build the version of K we're testing against, so
+# that we know that they were build cleanly from a particular SHA.
+need_in_path kompile
+
+need_in_path pandoc-tangle
+
+do_tangle basic.md
 
 while read out_file; do
     do_run "$out_file"
