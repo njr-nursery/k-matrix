@@ -21,9 +21,6 @@ with_kserver() {
     return $exit_status
 }
 
-start_kserver() { kserver & sleep 2; }
-stop_kserver()  { stop-kserver;      }
-
 use_rvk() {
     type opam >/dev/null || {
         echo >&2 '`opam` not installed`'
