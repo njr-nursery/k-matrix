@@ -47,7 +47,7 @@ use_rvk() {
 }
 
 [[ $# -ne 0 ]] || {
-    echo >&2 "Usage: $0 [uiuc|rv] command args"
+    echo >&2 "Usage: $0 [uiuck|rvk] command args"
     exit 1
 }
 
