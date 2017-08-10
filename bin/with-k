@@ -49,7 +49,7 @@ use_rvk() {
 }
 
 [[ $# -ne 0 ]] || {
-    echo >&2 "Usage: $0 [uiuck|rvk|bothk] command args"
+    echo >&2 "Usage: $0 [uiuck|rvk] command args"
     exit 1
 }
 
@@ -59,6 +59,5 @@ case "$which_k" in
            # TODO: RVK requires using kserver -- otherwise some of it's scripts
            # don't set classpath correctly
     rvk)   use_rvk; with_kserver "$@" ;;
-    bothk) use_rvk; with_kserver "$@"; use_uiuck; "$@" ;;
     *)     echo >&2 "Unknown K: '$which_k'"; exit 1 ;;
 esac
