@@ -4,13 +4,14 @@ set -e      # Exit immediately if any command fails
 set -u      # Using undefined variables is an error. Exit immediately
 
 base_dir="$(cd "$(dirname "$0")/.."; pwd)"
-uiuck_dir="$base_dir/backends/java/k"
-rvk_dir="$base_dir/backends/rv/k"
+uiuc_dir="$base_dir/backends/java/"
+rv_dir="$base_dir/backends/rv/"
 
 use_uiuck() {
-    git submodule update  --init "$uiuck_dir"
-    (cd "$uiuck_dir"; mvn package -q -DskipTests)
-    export PATH="$uiuck_dir/k-distribution/target/release/k/bin/:$PATH"
+    git submodule update  --init "$uiuc_dir/k"
+    (cd "$uiuc_dir/k"; mvn package -q -DskipTests)
+    PATH="$uiuc_dir/k/k-distribution/target/release/k/bin/:$PATH"
+    PATH="$uiuc_dir/helpers/:$PATH"
 }
 
 with_kserver() {
@@ -26,19 +27,22 @@ use_rvk() {
         echo >&2 '`opam` not installed`'
         exit 1
     }
-    git submodule update  --init "$rvk_dir"
-    (cd "$rvk_dir"; mvn package -q -DskipTests)
-    local release_dir="$rvk_dir/k-distribution/target/release/k"
+    git submodule update  --init "$rv_dir/k"
+    PATH="$rv_dir/k/k-distribution/target/release/k/bin/:$PATH"
+    PATH="$rv_dir/helpers/:$PATH"
+
+    (cd "$rv_dir/k"; mvn package -q -DskipTests)
+    local release_dir="$rv_dir/k/k-distribution/target/release/k"
     export \
         PATH="$release_dir/lib/native/linux:$release_dir/lib/native/linux64:$release_dir/bin/:$PATH" \
         LD_LIBRARY_PATH="$release_dir/lib/native/linux64:${LD_LIBRARY_PATH:-}"
 
     opam init --no-setup
-    opam repository add k "$rvk_dir/k-distribution/target/release/k/lib/opam" \
-        || opam repository set-url k "$rvk_dir/k-distribution/target/release/k/lib/opam"
-    cp "$rvk_dir"/k-distribution/include/ocaml/fakelibs/{libffi.a,libz.a}
-    export LIBFFI_LIBS="-L$rvk_dir/k-distribution/include/ocaml/fakelibs -lffi"
-    export LIBFFI_CFLAGS="-I$rvk_dir/k-distribution/include/ocaml/fakelibs"
+    opam repository add k "$rv_dir/k/k-distribution/target/release/k/lib/opam" \
+        || opam repository set-url k "$rv_dir/k/k-distribution/target/release/k/lib/opam"
+    cp "$rv_dir/k"/k-distribution/include/ocaml/fakelibs/{libffi.a,libz.a}
+    export LIBFFI_LIBS="-L$rv_dir/k/k-distribution/include/ocaml/fakelibs -lffi"
+    export LIBFFI_CFLAGS="-I$rv_dir/k/k-distribution/include/ocaml/fakelibs"
     opam update
     opam switch 4.03.0+k
     opam install --yes mlgmp zarith uuidm cryptokit

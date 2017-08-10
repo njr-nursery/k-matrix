@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 base="$(cd "$(dirname "$0")" && pwd -P)"
 test_base="$base/tests/"
 
@@ -11,28 +13,28 @@ die() { echo >&2 FATAL: $@; exit 1; }
 have_k() { type kompile >/dev/null || die "kompile unavailable."; }
 
 do_kompile() {
-    local lang_file="$1"; shift         # Absolute path to a '.k' file
-    local relative="${lang_file##$test_base}"
-    local rel_dirname=${relative%%.k}
-
-    local target_dir=".build/$rel_dirname"
     mkdir -p "$target_dir"
     kompile -d "$target_dir" "$lang_file"
     echo "$target_dir"
 }
 
-do_run() {
+do_test() {
     local out_file="$1"
     local program="${out_file%.out}"
     local lang="${program##*.}"    # Extract lang from extension
     local k_def="$(dirname "$out_file")/$lang.k"
-    [[ -e "$k_def"   ]] || die "K definition '$k_def' doesn't exist"
-    [[ -e "$program" ]] || die "Program '$program' doesn't exist"
 
-    progress "Kompiling $k_def"
-    lang_kompiled="$(do_kompile "$k_def")"
-    progress "Running $program"
-    do_diff <(krun -d "$lang_kompiled" "$program") "$out_file"
+    local relative="${k_def##$test_base}"
+    local rel_dirname=${relative%%.k}
+    local target_dir=".build/$rel_dirname"
+
+    progress "Building spec $k_def"
+    [[ -e "$k_def" ]] || die "K definition '$k_def' doesn't exist"
+    build-spec "$k_def" "$target_dir"
+
+    progress "Running program $program"
+    [[ -e "$program" ]] || die "Program '$program' doesn't exist"
+    do_diff <(run-with-built-spec "$program" "$target_dir") "$out_file"
 }
 
 my_diff=colordiff
@@ -47,5 +49,5 @@ cd "$base"
 have_k
 
 while read out_file; do
-    do_run "$out_file"
+    do_test "$out_file"
 done < <(find "$test_base" -name '*.out')

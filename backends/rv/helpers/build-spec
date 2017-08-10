@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -e; set -u
+
+spec_file="$1";  shift
+target_dir="$1"; shift
+
+kompile -d "$target_dir" "$spec_file"

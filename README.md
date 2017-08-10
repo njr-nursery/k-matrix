@@ -12,3 +12,18 @@ feature. As part of this document tests describing both the happy and unhappy
 paths of the feature will be present. These test cases will be written in a way
 that is portable across K-backends (e.g. discrepancies between output formats
 should be taken care of somehow).
+
+## Adding a backend
+
+XXX
+
+## Issues
+
+Building the semantics with RV is non-trivial. Ideally, there should be a one
+step build process, either directly part of `kompile` or using an RVK provided
+helper.
+
+`kserver` should have a `--daemon` option. This option would parse arguments,
+open required sockets and peform any other initialization and the fork.
+This will allow easy detection errors during startup when running it in the
+background.

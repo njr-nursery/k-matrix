@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+program="$1"; shift
+lang_dir="$1"; shift
+
+krun -d "$lang_dir" "$program"
