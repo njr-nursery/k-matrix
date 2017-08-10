@@ -3,9 +3,9 @@
 set -e      # Exit immediately if any command fails
 set -u      # Using undefined variables is an error. Exit immediately
 
-base_dir="$(cd "$(dirname "$0")/../.."; pwd)"
-uiuck_dir="$base_dir/tests/ci/uiuc-k"
-rvk_dir="$base_dir/tests/ci/rv-k"
+base_dir="$(cd "$(dirname "$0")/.."; pwd)"
+uiuck_dir="$base_dir/backends/java/k"
+rvk_dir="$base_dir/backends/rv/k"
 
 use_uiuck() {
     git submodule update  --init "$uiuck_dir"
