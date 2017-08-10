@@ -1,0 +1,6 @@
+[submodule "backends/java/k"]
+	path = backends/java/k
+	url = https://github.com/kframework/k
+[submodule "backends/rv/k"]
+	path = backends/rv/k
+	url = https://github.com/runtimeverification/k
